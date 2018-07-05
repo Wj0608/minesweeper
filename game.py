@@ -80,7 +80,6 @@ class Game:
         self.temp[r][c] = 1
         row = len(self.map)
         col = len(self.map[0])
-        print("expand (%d,%d)" % (r, c))
         self.showmap[r][c] = self.map[r][c]
         if r-1>=0 and c-1>=0:
             if self.map[r-1][c-1] != '*' and self.map[r][c] == 0:
@@ -138,23 +137,25 @@ class Game:
                 print(m[i][j], end='|')
 
             print('')
+        print('')
 
 
     def click(self):
         while 1:
             r = int(input("Please enter the number of rows you want to click: ")) - 1
-            if r >= 0:
+            if 0 <= r < len(self.map):
                 break
             else:
                 print("Input not valid.")
         while 1:
             c = int(input("Please enter the number of columns you want to click: ")) - 1
-            if c >= 0:
+            if 0 <= c < len(self.map[0]):
                 break
             else:
                 print("Input not valid.")
         #if the block is a mine
         if self.map[r][c] == '*':
+            self.showmap[r][c] = '*'
             print("Boom! You Lose.")
             self.isOver = True
         else:
