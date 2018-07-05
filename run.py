@@ -2,6 +2,7 @@ __author__ = 'DELL'
 
 import time
 import os
+import game
 
 def Map(r,c):
     l = []
@@ -13,11 +14,15 @@ def Map(r,c):
     return l
 
 def run():
-
-    row = input("Please enter the number of rows: ")
-    col = input("Please enter the number of columns: ")
-    map = Map(row,col)
-    print(map)
+    ms = game.Game()
+    ms.display(ms.map)
+    while not ms.isOver:
+        ms.click()
+        ms.display(ms.showmap)
+        if ms.finish():
+            print("You win!")
+            ms.isOver = True
+    ms.display(ms.map)
 
 
 if __name__ == '__main__':
