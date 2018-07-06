@@ -1,8 +1,8 @@
 __author__ = 'DELL'
 
-import time
-import os
+
 import game
+import point
 
 
 def run():
@@ -25,5 +25,20 @@ def run():
     ms.display(ms.map)
 
 
+def solve():
+    ms = game.Game()
+    ms.display(ms.showmap)
+    while not ms.isOver:
+        ms.autoclick()
+        ms.display(ms.showmap)
+        if ms.finish():
+            print("You win!")
+            ms.isOver = True
+    ms.display(ms.map)
+
+
 if __name__ == '__main__':
-    run()
+    # run()
+    solve()
+
+
