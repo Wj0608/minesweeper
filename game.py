@@ -76,6 +76,27 @@ class Game:
                     if self.map[i-1][j+1] != '*':
                         self.map[i-1][j+1] += 1
 
+    def mark(self):
+        while 1:
+            r = int(input("Please enter the number of rows you want to mark: ")) - 1
+            if 0 <= r < len(self.map):
+                break
+            else:
+                print("Input not valid.")
+        while 1:
+            c = int(input("Please enter the number of columns you want to mark: ")) - 1
+            if 0 <= c < len(self.map[0]):
+                break
+            else:
+                print("Input not valid.")
+        if self.showmap[r][c] == " ":
+            self.showmap[r][c] = "*"
+        elif self.showmap[r][c] == "*":
+            self.showmap[r][c] = " "
+        else:
+            print("You cannot mark that block.")
+
+
     def expand(self, r, c):
         self.temp[r][c] = 1
         row = len(self.map)
@@ -125,7 +146,7 @@ class Game:
     def finish(self):
         for i in range(0, len(self.showmap)):
             for j in range(0, len(self.showmap[0])):
-                if self.showmap[i][j] == " ":
+                if self.showmap[i][j] == " " or self.showmap[i][j] == "*":
                     if self.map[i][j] != '*':
                         return False
         return True

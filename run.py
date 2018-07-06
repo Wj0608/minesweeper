@@ -4,19 +4,19 @@ import time
 import os
 import game
 
-def Map(r,c):
-    l = []
-    for i in range(0, int(r)):
-        ll = []
-        for j in range(0, int(c)):
-            ll.append(0)
-        l.append(ll)
-    return l
 
 def run():
     ms = game.Game()
-    ms.display(ms.map)
+    ms.display(ms.showmap)
     while not ms.isOver:
+        finish = False
+        while not finish:
+            str = input("Do you want to mark any block?(y/n): ")
+            if str == "y":
+                ms.mark()
+                ms.display(ms.showmap)
+            else:
+                finish = True
         ms.click()
         ms.display(ms.showmap)
         if ms.finish():
