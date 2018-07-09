@@ -27,11 +27,9 @@ def run():
 
 def solve():
     ms = game.Game()
-    ms.display(ms.map)
     while not ms.isOver:
-        ms.display(ms.pmap)
         ms.autoclick()
-        print("auto finish one step")
+        print("Mark possible mines")
         ms.display(ms.showmap)
         if ms.finish():
             print("You win!")

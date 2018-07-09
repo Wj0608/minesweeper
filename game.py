@@ -11,6 +11,7 @@ class Game:
     temp = []
     isOver = False
     blist = []
+    clicklist = []
 
     def __init__(self):
         # generate empty map
@@ -108,40 +109,41 @@ class Game:
         if self.showmap[r][c] == " ":
             self.blist.append(point.Point(r, c))
 
-    def addone(self, r, c, t):
+    def addone(self, r, c, t, m):
         if self.showmap[r][c] == " ":
-            print("add one")
             t += 1
-        return t
+        if self.showmap[r][c] == "*":
+            m += 1
+        return t, m
 
     def prob(self, r, c, mul):
-        print("add the contribution of (%s, %s)" % (r, c))
-        if self.showmap[r][c] != " ":
+        notMine = False
+        if self.showmap[r][c] != " " and self.showmap[r][c] != '*':
             row = len(self.map)
             col = len(self.map[0])
             total = 0
-
+            mark = 0
             if r - 1 >= 0 and c - 1 >= 0:
-                total = self.addone(r - 1, c - 1, total)
+                total, mark = self.addone(r - 1, c - 1, total, mark)
             if r - 1 >= 0:
-                total = self.addone(r - 1, c, total)
+                total, mark = self.addone(r - 1, c, total, mark)
             if c - 1 >= 0:
-                total = self.addone(r, c - 1, total)
+                total, mark = self.addone(r, c - 1, total, mark)
             if r + 1 < row and c + 1 < col:
-                total = self.addone(r + 1, c + 1, total)
+                total, mark = self.addone(r + 1, c + 1, total, mark)
             if r + 1 < row:
-                total = self.addone(r + 1, c, total)
+                total, mark = self.addone(r + 1, c, total, mark)
             if c + 1 < col:
-                total = self.addone(r, c + 1, total)
+                total, mark = self.addone(r, c + 1, total, mark)
             if r + 1 < row and c - 1 >= 0:
-                total = self.addone(r + 1, c - 1, total)
+                total, mark = self.addone(r + 1, c - 1, total, mark)
             if r - 1 >= 0 and c + 1 < col:
-                total = self.addone(r - 1, c + 1, total)
-            print("total = %d" % total)
-            print(mul)
-            print(1 - self.showmap[r][c]/total)
-            mul *= (1 - self.showmap[r][c]/total)
-        return mul
+                total, mark = self.addone(r - 1, c + 1, total, mark)
+            temp = 1 - (self.showmap[r][c] - mark) / total
+            if temp == 1:
+                notMine = True
+            mul *= temp
+        return mul, notMine
 
     def calculate(self, p):
         r = p.x
@@ -149,23 +151,46 @@ class Game:
         row = len(self.map)
         col = len(self.map[0])
         multi = 1
-        print("calculate the prob of block (%s, %s)" % (r, c))
         if r - 1 >= 0 and c - 1 >= 0:
-            multi = self.prob(r - 1, c - 1, multi)
+            temp = multi
+            multi, notMine = self.prob(r - 1, c - 1, multi)
+            if notMine:
+                return 0
         if r - 1 >= 0:
-            multi = self.prob(r - 1, c, multi)
+            temp = multi
+            multi, notMine = self.prob(r - 1, c, multi)
+            if notMine:
+                return 0
         if c - 1 >= 0:
-            multi = self.prob(r, c - 1, multi)
+            temp = multi
+            multi, notMine = self.prob(r, c - 1, multi)
+            if notMine:
+                return 0
         if r + 1 < row and c + 1 < col:
-            multi = self.prob(r + 1, c + 1, multi)
+            temp = multi
+            multi, notMine = self.prob(r + 1, c + 1, multi)
+            if notMine:
+                return 0
         if r + 1 < row:
-            multi = self.prob(r + 1, c, multi)
+            temp = multi
+            multi, notMine = self.prob(r + 1, c, multi)
+            if notMine:
+                return 0
         if c + 1 < col:
-            multi = self.prob(r, c + 1, multi)
+            temp = multi
+            multi, notMine = self.prob(r, c + 1, multi)
+            if notMine:
+                return 0
         if r + 1 < row and c - 1 >= 0:
-            multi = self.prob(r + 1, c - 1, multi)
+            temp = multi
+            multi, notMine = self.prob(r + 1, c - 1, multi)
+            if notMine:
+                return 0
         if r - 1 >= 0 and c + 1 < col:
-            multi = self.prob(r - 1, c + 1, multi)
+            temp = multi
+            multi, notMine = self.prob(r - 1, c + 1, multi)
+            if notMine:
+                return 0
         return 1 - multi
 
     def update(self, r, c):
@@ -289,12 +314,18 @@ class Game:
         tr = 0
         tc = 0
         for i in range(0, len(self.pmap)):
-            for j in range(0, len(self.pmap)):
+            for j in range(0, len(self.pmap[0])):
                 if self.pmap[i][j] < min:
                     min = self.pmap[i][j]
-                    tr = i
-                    tc = j
-        print("auto click (%d, %d)" % (tr, tc))
+        for i in range(0, len(self.pmap)):
+            for j in range(0, len(self.pmap[0])):
+                if self.pmap[i][j] == min:
+                    self.clicklist.append(point.Point(i, j))
+        index = random.randint(0, len(self.clicklist)-1)
+        tr = self.clicklist[index].x
+        tc = self.clicklist[index].y
+        self.clicklist = []
+        print("Click at (%d, %d)" % (tr, tc))
         if self.map[tr][tc] == '*':
             self.showmap[tr][tc] = '*'
             print("Boom! You Lose.")
@@ -307,23 +338,22 @@ class Game:
         temp = []
         # delete duplicate blocks
         for i in self.blist:
-            print("the block is (%s, %s) %s" % (i.x, i.y, self.showmap[i.x][i.y]))
             if i not in temp:
                 temp.append(i)
         self.blist = temp.copy()
         # delete non-empty blocks
-        print("")
         i = 0
         while i < len(self.blist):
             if self.showmap[self.blist[i].x][self.blist[i].y] != " ":
                 self.blist.remove(self.blist[i])
             else:
                 i += 1
-        print("")
-        for i in self.blist:
-            print("the block is (%s, %s) %s" % (i.x, i.y, self.showmap[i.x][i.y]))
+
         for i in self.blist:
             self.pmap[i.x][i.y] = self.calculate(i)
+            if self.pmap[i.x][i.y] == 1:
+                self.showmap[i.x][i.y] = '*'
+
 
 
 
