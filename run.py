@@ -27,9 +27,11 @@ def run():
 
 def solve():
     ms = game.Game()
-    ms.display(ms.showmap)
+    ms.display(ms.map)
     while not ms.isOver:
+        ms.display(ms.pmap)
         ms.autoclick()
+        print("auto finish one step")
         ms.display(ms.showmap)
         if ms.finish():
             print("You win!")
@@ -37,8 +39,14 @@ def solve():
     ms.display(ms.map)
 
 
+def addone(a):
+    a += 1
+
+
 if __name__ == '__main__':
     # run()
     solve()
+
+
 
 

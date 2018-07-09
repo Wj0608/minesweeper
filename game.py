@@ -110,30 +110,38 @@ class Game:
 
     def addone(self, r, c, t):
         if self.showmap[r][c] == " ":
+            print("add one")
             t += 1
+        return t
 
     def prob(self, r, c, mul):
+        print("add the contribution of (%s, %s)" % (r, c))
         if self.showmap[r][c] != " ":
             row = len(self.map)
             col = len(self.map[0])
             total = 0
+
             if r - 1 >= 0 and c - 1 >= 0:
-                self.addone(r - 1, c - 1, total)
+                total = self.addone(r - 1, c - 1, total)
             if r - 1 >= 0:
-                self.addone(r - 1, c, total)
+                total = self.addone(r - 1, c, total)
             if c - 1 >= 0:
-                self.addone(r, c - 1, total)
+                total = self.addone(r, c - 1, total)
             if r + 1 < row and c + 1 < col:
-                self.addone(r + 1, c + 1, total)
+                total = self.addone(r + 1, c + 1, total)
             if r + 1 < row:
-                self.addone(r + 1, c, total)
+                total = self.addone(r + 1, c, total)
             if c + 1 < col:
-                self.addone(r, c + 1, total)
+                total = self.addone(r, c + 1, total)
             if r + 1 < row and c - 1 >= 0:
-                self.addone(r + 1, c - 1, total)
+                total = self.addone(r + 1, c - 1, total)
             if r - 1 >= 0 and c + 1 < col:
-                self.addone(r - 1, c + 1, total)
+                total = self.addone(r - 1, c + 1, total)
+            print("total = %d" % total)
+            print(mul)
+            print(1 - self.showmap[r][c]/total)
             mul *= (1 - self.showmap[r][c]/total)
+        return mul
 
     def calculate(self, p):
         r = p.x
@@ -141,26 +149,27 @@ class Game:
         row = len(self.map)
         col = len(self.map[0])
         multi = 1
+        print("calculate the prob of block (%s, %s)" % (r, c))
         if r - 1 >= 0 and c - 1 >= 0:
-            self.prob(r - 1, c - 1, multi)
+            multi = self.prob(r - 1, c - 1, multi)
         if r - 1 >= 0:
-            self.prob(r - 1, c, multi)
+            multi = self.prob(r - 1, c, multi)
         if c - 1 >= 0:
-            self.prob(r, c - 1, multi)
+            multi = self.prob(r, c - 1, multi)
         if r + 1 < row and c + 1 < col:
-            self.prob(r + 1, c + 1, multi)
+            multi = self.prob(r + 1, c + 1, multi)
         if r + 1 < row:
-            self.prob(r + 1, c, multi)
+            multi = self.prob(r + 1, c, multi)
         if c + 1 < col:
-            self.prob(r, c + 1, multi)
+            multi = self.prob(r, c + 1, multi)
         if r + 1 < row and c - 1 >= 0:
-            self.prob(r + 1, c - 1, multi)
+            multi = self.prob(r + 1, c - 1, multi)
         if r - 1 >= 0 and c + 1 < col:
-            self.prob(r - 1, c + 1, multi)
+            multi = self.prob(r - 1, c + 1, multi)
         return 1 - multi
 
     def update(self, r, c):
-        self.showmap[r][c] = self.map[r][c]
+        self.pmap[r][c] = 1
         row = len(self.map)
         col = len(self.map[0])
         if r-1>=0 and c-1>=0:
@@ -179,51 +188,61 @@ class Game:
             self.check(r+1, c-1)
         if r-1>=0 and c+1<col:
             self.check(r-1, c+1)
-        
 
     def expand(self, r, c):
         self.temp[r][c] = 1
+        self.pmap[r][c] = 1
         row = len(self.map)
         col = len(self.map[0])
-        self.update(r, c)
+        self.showmap[r][c] = self.map[r][c]
+        if self.showmap[r][c] != 0:
+            self.update(r, c)
         if r-1>=0 and c-1>=0:
             if self.map[r-1][c-1] != '*' and self.map[r][c] == 0:
                 self.showmap[r-1][c-1] = self.map[r-1][c-1]
+                self.update(r-1, c-1)
             if self.map[r-1][c-1] == 0 and self.temp[r-1][c-1] == 0:
                 self.expand(r-1, c-1)
         if r-1>=0:
             if self.map[r-1][c] != '*' and self.map[r][c] == 0:
                 self.showmap[r-1][c] = self.map[r-1][c]
+                self.update(r-1, c)
             if self.map[r-1][c] == 0 and self.temp[r-1][c] == 0:
                 self.expand(r-1, c)
         if c-1>=0:
             if self.map[r][c-1] != '*' and self.map[r][c] == 0:
                 self.showmap[r][c-1] = self.map[r][c-1]
+                self.update(r, c-1)
             if self.map[r][c-1] == 0 and self.temp[r][c-1] == 0:
                 self.expand(r, c-1)
         if r+1<row and c+1<col:
             if self.map[r+1][c+1] != '*' and self.map[r][c] == 0:
                 self.showmap[r+1][c+1] = self.map[r+1][c+1]
+                self.update(r+1, c+1)
             if self.map[r+1][c+1] == 0 and self.temp[r+1][c+1] == 0:
                 self.expand(r+1, c+1)
         if r+1<row:
             if self.map[r+1][c] != '*' and self.map[r][c] == 0:
                 self.showmap[r+1][c] = self.map[r+1][c]
+                self.update(r+1, c)
             if self.map[r+1][c] == 0 and self.temp[r+1][c] == 0:
                 self.expand(r+1, c)
         if c+1<col:
             if self.map[r][c+1] != '*' and self.map[r][c] == 0:
                 self.showmap[r][c+1] = self.map[r][c+1]
+                self.update(r, c+1)
             if self.map[r][c+1] == 0 and self.temp[r][c+1] == 0:
                 self.expand(r, c+1)
         if r+1<row and c-1>=0:
             if self.map[r+1][c-1] != '*' and self.map[r][c] == 0:
                 self.showmap[r+1][c-1] = self.map[r+1][c-1]
+                self.update(r+1, c-1)
             if self.map[r+1][c-1] == 0 and self.temp[r+1][c-1] == 0:
                 self.expand(r+1, c-1)
         if r-1>=0 and c+1<col:
             if self.map[r-1][c+1] != '*' and self.map[r][c] == 0:
                 self.showmap[r-1][c+1] = self.map[r-1][c+1]
+                self.update(r-1, c+1)
             if self.map[r-1][c+1] == 0 and self.temp[r-1][c+1] == 0:
                 self.expand(r-1, c+1)
 
@@ -275,23 +294,35 @@ class Game:
                     min = self.pmap[i][j]
                     tr = i
                     tc = j
+        print("auto click (%d, %d)" % (tr, tc))
         if self.map[tr][tc] == '*':
             self.showmap[tr][tc] = '*'
             print("Boom! You Lose.")
             self.isOver = True
+            return
         else:
             self.expand(tr, tc)
         # sort the list, then update every block in the list
+        self.display(self.showmap)
         temp = []
+        # delete duplicate blocks
         for i in self.blist:
+            print("the block is (%s, %s) %s" % (i.x, i.y, self.showmap[i.x][i.y]))
             if i not in temp:
                 temp.append(i)
         self.blist = temp.copy()
+        # delete non-empty blocks
+        print("")
+        i = 0
+        while i < len(self.blist):
+            if self.showmap[self.blist[i].x][self.blist[i].y] != " ":
+                self.blist.remove(self.blist[i])
+            else:
+                i += 1
+        print("")
         for i in self.blist:
-            if self.showmap[i.x][i.y] != " ":
-                self.blist.remove(i)
+            print("the block is (%s, %s) %s" % (i.x, i.y, self.showmap[i.x][i.y]))
         for i in self.blist:
-            print("the block is %s" % self.showmap[i.x][i.y])
             self.pmap[i.x][i.y] = self.calculate(i)
 
 
